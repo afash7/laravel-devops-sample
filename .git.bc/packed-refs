@@ -1,0 +1,4 @@
+# pack-refs with: peeled fully-peeled sorted 
+2ac2e7982d7739d39377e7ca4cdf84a462798bc6 refs/remotes/origin/Nextjs13_laravel10
+abc76aee9bb469fbff38bf11346a254935ca0fd1 refs/remotes/origin/main
+3ddb349d6e5f9649100d5c6eb4f144b523f984f9 refs/tags/v1.0.0

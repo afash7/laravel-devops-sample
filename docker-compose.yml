@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+
+  nginx:
+    build: ./docker/nginx
+    ports:
+      - "80:8080"
+    depends_on:
+      - api
+      - web
+    networks:
+      - app_net
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    env_file:
+      - backend/api/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_net
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    command: php artisan queue:work redis --sleep=3 --tries=3
+    env_file:
+      - backend/api/.env
+    depends_on:
+      - redis
+      - api
+    restart: always
+    networks:
+      - app_net
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - app_net
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_net
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - app_net
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - app_net
+
+volumes:
+  db_data:
+
+networks:
+  app_net:
+    driver: bridge
