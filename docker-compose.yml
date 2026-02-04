@@ -40,12 +40,13 @@ services:
 
   web:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    networks:
-      - app_net
+    depends_on:
+      - api
+
 
   db:
     image: mysql:8.0
