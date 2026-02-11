@@ -1,4 +1,4 @@
-version: "3.8"
+# version: "3.8"
 
 services:
 
@@ -14,8 +14,8 @@ services:
 
   web:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./frontend/app
+      dockerfile: ../Dockerfile
     ports:
       - "3000:3000"
     depends_on:
@@ -52,8 +52,8 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: root
     volumes:
       - db_data:/var/lib/mysql
     networks:
