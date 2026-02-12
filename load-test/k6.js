@@ -7,6 +7,7 @@ export const options = {
 };
 
 export default function () {
+  // به جای localhost بنویس nginx
   const res = http.get('http://nginx/api/health');
 
   check(res, {

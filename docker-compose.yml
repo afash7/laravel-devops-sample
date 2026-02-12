@@ -1,16 +1,27 @@
-# version: "3.8"
-
 services:
-
   nginx:
     build: ./docker/nginx
     ports:
-      - "80:8080"
+      - "80:80"
+    volumes:
+      - ./backend/api:/var/www/html
     depends_on:
       - api
       - web
     networks:
       - app_net
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx-exporter
+    environment:
+      - SCRAPE_URI=http://nginx:80/metrics
+    ports:
+      - "9113:9113"
+    networks:
+      - app_net
+    depends_on:
+      - nginx
 
   web:
     build:
@@ -20,6 +31,8 @@ services:
       - "3000:3000"
     depends_on:
       - api
+    networks:
+      - app_net
 
   api:
     build:
@@ -32,6 +45,7 @@ services:
       - redis
     networks:
       - app_net
+    user: "1000:1000"
 
   worker:
     build:
@@ -47,13 +61,14 @@ services:
     networks:
       - app_net
 
-
   db:
     image: mysql:8.0
     restart: always
     environment:
       MYSQL_DATABASE: laravel
       MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -62,6 +77,14 @@ services:
   redis:
     image: redis:alpine
     restart: always
+    networks:
+      - app_net
+
+  # --- سرویس جدید: مترجم ردیس برای پرومتئوس ---
+  redis-exporter:
+    image: oliver006/redis_exporter
+    environment:
+      - REDIS_ADDR=redis:6379
     networks:
       - app_net
 
@@ -90,7 +113,6 @@ services:
     volumes:
       - ./load-test:/scripts
     entrypoint: ["k6"]
-
 
 volumes:
   db_data:
